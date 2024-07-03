@@ -81,5 +81,8 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.material.icons.extended.android)
+
+    implementation ("com.google.accompanist:accompanist-navigation-animation:0.30.1")
+
 }
 
