@@ -48,6 +48,12 @@ class ContactViewModel @Inject constructor(var database: ContactDatabase) : View
         )
         viewModelScope.launch {
             database.dao.upsertContact(contact)
+            state.value.id.value = 0
+            state.value.name.value = ""
+            state.value.number.value = ""
+            state.value.email.value = ""
+            state.value.dateOfCreation.value = 0
+            state.value.image.value = null
         }
 
     }
