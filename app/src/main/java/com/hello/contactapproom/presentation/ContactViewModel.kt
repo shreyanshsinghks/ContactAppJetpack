@@ -13,28 +13,30 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.math.truncate
 
 @HiltViewModel
 class ContactViewModel @Inject constructor(var database: ContactDatabase) : ViewModel() {
     private var isSortedByName = MutableStateFlow(true)
+    private val searchQuery = MutableStateFlow("")
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val contact = isSortedByName.flatMapLatest {
-        if (it) {
-            database.dao.getContactSortedByName()
+    private val contact = combine(isSortedByName, searchQuery) { isSorted, query ->
+        Pair(isSorted, query)
+    }.flatMapLatest { (isSorted, query) ->
+        if (isSorted) {
+            database.dao.searchContactsSortedByName("%$query%")
         } else {
-            database.dao.getContactSortedByDate()
+            database.dao.searchContactsSortedByDate("%$query%")
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
 
     private val _state = MutableStateFlow(ContactState())
-    val state = combine(_state, contact, isSortedByName) { _state, contacts, isSortedByName ->
-        _state.copy(
-            contacts = contacts
+    val state = combine(_state, contact, isSortedByName, searchQuery) { state, contacts, isSortedByName, query ->
+        state.copy(
+            contacts = contacts,
+            searchQuery = state.searchQuery.apply { value = query }
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), ContactState())
-
 
     fun saveContact() {
         val contact = Contact(
@@ -48,14 +50,8 @@ class ContactViewModel @Inject constructor(var database: ContactDatabase) : View
         )
         viewModelScope.launch {
             database.dao.upsertContact(contact)
-            state.value.id.value = 0
-            state.value.name.value = ""
-            state.value.number.value = ""
-            state.value.email.value = ""
-            state.value.dateOfCreation.value = 0
-            state.value.image.value = null
+            resetState()
         }
-
     }
 
     fun changeSorting() {
@@ -74,7 +70,15 @@ class ContactViewModel @Inject constructor(var database: ContactDatabase) : View
         )
         viewModelScope.launch {
             database.dao.deleteContact(contactDelete)
+            resetState()
         }
+    }
+
+    fun onSearchQueryChange(query: String) {
+        searchQuery.value = query
+    }
+
+    private fun resetState() {
         state.value.id.value = 0
         state.value.name.value = ""
         state.value.number.value = ""

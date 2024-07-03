@@ -7,71 +7,40 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.Phone
-import androidx.compose.material.icons.rounded.SortByAlpha
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.rounded.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.hello.contactapproom.data.database.Contact
 import com.hello.contactapproom.navigation.Routes
-import com.hello.contactapproom.ui.theme.backgroundColor
-import com.hello.contactapproom.ui.theme.dividerColor
-import com.hello.contactapproom.ui.theme.primaryColor
-import com.hello.contactapproom.ui.theme.primaryVariant
-import com.hello.contactapproom.ui.theme.secondaryColor
-import com.hello.contactapproom.ui.theme.surfaceColor
-import com.hello.contactapproom.ui.theme.textPrimaryColor
-import com.hello.contactapproom.ui.theme.textSecondaryColor
+import com.hello.contactapproom.ui.theme.*
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.runtime.*
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.text.TextStyle
 import kotlinx.coroutines.delay
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,14 +50,64 @@ fun AllContactScreen(
     navController: NavController
 ) {
     val context = LocalContext.current
+    var isSearchActive by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Contacts", color = surfaceColor) },
+                title = {
+                    if (isSearchActive) {
+                        TextField(
+                            value = searchQuery,
+                            onValueChange = {
+                                searchQuery = it
+                                viewModel.onSearchQueryChange(it)
+                            },
+                            placeholder = {
+                                Text(
+                                    "Search contacts",
+                                    color = Color.White.copy(alpha = 0.7f)
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            textStyle = TextStyle(color = Color.White),
+                            singleLine = true,
+                            colors = TextFieldDefaults.colors(
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White,
+                                cursorColor = Color.White,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                disabledIndicatorColor = Color.Transparent,
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent
+                            )
+                        )
+                    } else {
+                        Text("Contacts", color = surfaceColor)
+                    }
+                },
                 actions = {
+                    IconButton(onClick = {
+                        isSearchActive = !isSearchActive
+                        if (!isSearchActive) {
+                            searchQuery = ""
+                            viewModel.onSearchQueryChange("")
+                        }
+                    }) {
+                        Icon(
+                            if (isSearchActive) Icons.Rounded.Close else Icons.Rounded.Search,
+                            contentDescription = "Search",
+                            tint = surfaceColor
+                        )
+                    }
                     IconButton(onClick = { viewModel.changeSorting() }) {
-                        Icon(Icons.Rounded.SortByAlpha, contentDescription = "Sort", tint = surfaceColor)
+                        Icon(
+                            Icons.Rounded.SortByAlpha,
+                            contentDescription = "Sort",
+                            tint = surfaceColor
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -116,7 +135,6 @@ fun AllContactScreen(
                 ContactCard(
                     contact = contact,
                     onEditClick = {
-                        // Update state and navigate
                         state.id.value = contact.id
                         state.number.value = contact.number
                         state.email.value = contact.email
@@ -125,7 +143,6 @@ fun AllContactScreen(
                         navController.navigate(Routes.AddEditScreen.route)
                     },
                     onDeleteClick = {
-                        // Update state and delete
                         state.id.value = contact.id
                         state.number.value = contact.number
                         state.email.value = contact.email
@@ -177,7 +194,7 @@ fun ContactCard(
 
     LaunchedEffect(isCallInitiated) {
         if (isCallInitiated) {
-            delay(300)  // Wait for the animation to complete
+            delay(300)
             onCallClick()
             isCallInitiated = false
             offsetX = 0f
@@ -189,7 +206,6 @@ fun ContactCard(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        // Phone icon background
         Box(
             modifier = Modifier
                 .matchParentSize()
@@ -207,7 +223,6 @@ fun ContactCard(
             )
         }
 
-        // Contact card
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -218,11 +233,9 @@ fun ContactCard(
                     orientation = Orientation.Horizontal,
                     onDragStopped = {
                         if (offsetX.absoluteValue >= swipeThreshold) {
-                            // Animate the card off-screen
                             offsetX = if (offsetX > 0) cardWidthPx else -cardWidthPx
                             isCallInitiated = true
                         } else {
-                            // Reset position if not swiped far enough
                             offsetX = 0f
                         }
                     }
@@ -265,13 +278,17 @@ fun ContactCard(
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     IconButton(onClick = onCallClick) {
-                        Icon(Icons.Rounded.Phone, contentDescription = "Call", tint = primaryColor)
+                        Icon(Icons.Rounded.Phone, contentDescription = "Call", tint = iconPrimaryColor.copy(0.9f))
                     }
                     IconButton(onClick = onEditClick) {
-                        Icon(Icons.Rounded.Edit, contentDescription = "Edit", tint = secondaryColor)
+                        Icon(Icons.Rounded.Edit, contentDescription = "Edit", tint = iconSecondaryColor)
                     }
                     IconButton(onClick = onDeleteClick) {
-                        Icon(Icons.Rounded.Delete, contentDescription = "Delete", tint = Color.Red.copy(alpha = 0.8f))
+                        Icon(
+                            Icons.Rounded.Delete,
+                            contentDescription = "Delete",
+                            tint = iconDeleteColor.copy(0.8f)
+                        )
                     }
                 }
             }
@@ -310,4 +327,3 @@ fun ContactImage(image: ByteArray?, name: String) {
         }
     }
 }
-

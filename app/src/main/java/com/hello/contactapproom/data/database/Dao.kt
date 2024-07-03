@@ -20,4 +20,10 @@ interface Dao {
 
     @Query("SELECT * FROM contact_table ORDER BY dateOfCreation DESC")
     fun getContactSortedByDate(): Flow<List<Contact>>
+
+    @Query("SELECT * FROM contact_table WHERE name LIKE :query OR number LIKE :query OR email LIKE :query ORDER BY name ASC")
+    fun searchContactsSortedByName(query: String): Flow<List<Contact>>
+
+    @Query("SELECT * FROM contact_table WHERE name LIKE :query OR number LIKE :query OR email LIKE :query ORDER BY dateOfCreation DESC")
+    fun searchContactsSortedByDate(query: String): Flow<List<Contact>>
 }

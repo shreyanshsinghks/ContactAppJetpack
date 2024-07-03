@@ -19,3 +19,7 @@ val onSurfaceColor = Color(0xFF212121)  // Almost Black
 val textPrimaryColor = Color(0xFF212121)  // Almost Black
 val textSecondaryColor = Color(0xFF757575)  // Medium Grey
 val dividerColor = Color(0xFFBDBDBD)
+
+val iconPrimaryColor = Color(0xFF546E7A)    // Blue Grey
+val iconSecondaryColor = Color(0xFF78909C)  // Lighter Blue Grey
+val iconDeleteColor = Color(0xFFE57373)     // Soft Red
