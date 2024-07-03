@@ -38,6 +38,7 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextOverflow
 import kotlinx.coroutines.delay
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
@@ -270,7 +271,9 @@ fun ContactCard(
                     Text(
                         text = contact.email,
                         style = MaterialTheme.typography.bodySmall,
-                        color = textSecondaryColor
+                        color = textSecondaryColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
                 Row(
