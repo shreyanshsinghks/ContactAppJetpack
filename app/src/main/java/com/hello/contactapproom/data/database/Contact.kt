@@ -11,4 +11,5 @@ data class Contact(
     var email: String,
     var dateOfCreation: Long,
     var isActive: Boolean,
+    val image: ByteArray ?= null,
 )

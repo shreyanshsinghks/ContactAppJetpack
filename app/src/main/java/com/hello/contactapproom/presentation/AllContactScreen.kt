@@ -1,5 +1,9 @@
 package com.hello.contactapproom.presentation
 
+import android.content.Intent
+import android.graphics.BitmapFactory
+import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Menu
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -22,6 +27,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.hello.contactapproom.navigation.Routes
@@ -33,6 +40,7 @@ fun AllContactScreen(
     state: ContactState,
     navController: NavController
 ) {
+    val context = LocalContext.current
     Scaffold(
         topBar = {
             TopAppBar(modifier = Modifier.clickable {
@@ -50,13 +58,14 @@ fun AllContactScreen(
         Surface(modifier = Modifier.padding(innerPadding)) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(state.contacts) {
-
+                    val bitmap = it.image?.let { it1 -> BitmapFactory.decodeByteArray(it.image, 0, it1.size) }
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 20.dp, vertical = 10.dp)
                     ) {
                         Row (modifier = Modifier.fillMaxWidth()){
+                            Image(bitmap = bitmap!!.asImageBitmap(), contentDescription = null)
                             Column (
                                 modifier = Modifier.clickable {
                                     state.id.value = it.id
@@ -71,6 +80,13 @@ fun AllContactScreen(
                                 Text(text = it.number)
                                 Text(text = it.email)
                                 Text(text = it.dateOfCreation.toString())
+                            }
+                            Button(onClick = {
+                                val intent = Intent(Intent.ACTION_CALL)
+                                intent.data = Uri.parse("tel:${it.number}")
+                                context.startActivity(intent)
+                            }) {
+                                Text(text = "Call")
                             }
                             Icon(imageVector = Icons.Rounded.Delete, contentDescription = null,
                                 modifier = Modifier.clickable {

@@ -19,6 +19,6 @@ object HiltModule {
             application.applicationContext,
             ContactDatabase::class.java,
             "ContactApp.db"
-        ).build()
+        ).fallbackToDestructiveMigration().build()
     }
 }

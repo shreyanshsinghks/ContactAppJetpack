@@ -43,7 +43,8 @@ class ContactViewModel @Inject constructor(var database: ContactDatabase) : View
             number = state.value.number.value,
             email = state.value.email.value,
             dateOfCreation = System.currentTimeMillis(),
-            isActive = true
+            isActive = true,
+            image = state.value.image.value
         )
         viewModelScope.launch {
             database.dao.upsertContact(contact)
@@ -62,7 +63,8 @@ class ContactViewModel @Inject constructor(var database: ContactDatabase) : View
             number = state.value.number.value,
             email = state.value.email.value,
             dateOfCreation = state.value.dateOfCreation.value,
-            isActive = true
+            isActive = true,
+            image = state.value.image.value
         )
         viewModelScope.launch {
             database.dao.deleteContact(contactDelete)
@@ -72,5 +74,6 @@ class ContactViewModel @Inject constructor(var database: ContactDatabase) : View
         state.value.number.value = ""
         state.value.email.value = ""
         state.value.dateOfCreation.value = 0
+        state.value.image.value = null
     }
 }
